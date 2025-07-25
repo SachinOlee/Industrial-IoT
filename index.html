@@ -1,13 +1,730 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial IoT Automation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            transition: all  0.3s;
+        }
+        .machine-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .gauge-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%;
+        }
+        .gauge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .predictive-alert {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Industrial IoT Login</h2>
+                <button id="closeLogin" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label for="loginEmail" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="loginEmail" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="loginPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="loginPassword" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="rememberMe" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <label for="rememberMe" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                    </div>
+                    <a href="#" id="forgotPassword" class="text-sm text-blue-600 hover:text-blue-800">Forgot password?</a>
+                </div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Sign In
+                </button>
+            </form>
+            <p class="mt-4 text-center text-sm text-gray-600">
+                Don't have an account? <a href="#" id="showSignup" class="font-medium text-blue-600 hover:text-blue-800">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Create Account</h2>
+                <button id="closeSignup" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="signupForm" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
+                        <input type="text" id="firstName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+                        <input type="text" id="lastName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label for="signupEmail" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="signupEmail" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="signupPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="signupPassword" required minlength="8" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required minlength="8" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="userRole" class="block text-sm font-medium text-gray-700">User Role</label>
+                    <select id="userRole" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="operator">Operator</option>
+                        <option value="engineer">Engineer</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Create Account
+                </button>
+            </form>
+            <p class="mt-4 text-center text-sm text-gray-600">
+                Already have an account? <a href="#" id="showLogin" class="font-medium text-blue-600 hover:text-blue-800">Sign in</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Reset Password</h2>
+                <button id="closeForgotPassword" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="forgotPasswordForm" class="space-y-4">
+                <p class="text-sm text-gray-600">Enter your email address and we'll send you a link to reset your password.</p>
+                <div>
+                    <label for="resetEmail" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="resetEmail" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Send Reset Link
+                </button>
+            </form>
+            <p class="mt-4 text-center text-sm text-gray-600">
+                Remember your password? <a href="#" id="showLoginFromForgot" class="font-medium text-blue-600 hover:text-blue-800">Sign in</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar w-64 bg-gray-800 text-white p-4 transform -translate-x-full md:translate-x-0 transition-transform duration-300 fixed h-full z-40">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-4 mb-4">
+                <h1 class="text-xl font-bold flex items-center">
+                    <img src="https://placehold.co/40x40" alt="Industrial IoT logo showing a gear and microchip combined with network waves" class="mr-2 rounded-full">
+                    Industrial IoT
+                </h1>
+                <button id="closeSidebar" class="md:hidden">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="space-y-2">
+                <a href="#" id="dashboardLink" class="block px-4 py-2 rounded hover:bg-gray-700 flex items-center">
+                    <i class="fas fa-tachometer-alt mr-3 text-blue-400"></i>
+                    Dashboard
+                </a>
+                <a href="#" id="machinesLink" class="block px-4 py-2 rounded bg-gray-700 hover:bg-gray-700 flex items-center">
+                    <i class="fas fa-cog mr-3 text-blue-400"></i>
+                    Machines
+                </a>
+                <a href="#" id="alertsLink" class="block px-4 py-2 rounded hover:bg-gray-700 flex items-center">
+                    <i class="fas fa-bell mr-3 text-blue-400"></i>
+                    Alerts
+                </a>
+                <a href="#" id="reportsLink" class="block px-4 py-2 rounded hover:bg-gray-700 flex items-center">
+                    <i class="fas fa-chart-bar mr-3 text-blue-400"></i>
+                    Reports
+                </a>
+                <a href="#" id="usersLink" class="block px-4 py-2 rounded hover:bg-gray-700 flex items-center">
+                    <i class="fas fa-users mr-3 text-blue-400"></i>
+                    User Management
+                </a>
+            </nav>
+            <div class="absolute bottom-0 left-0 w-full p-4 border-t border-gray-700">
+                <div class="flex items-center">
+                    <img src="https://placehold.co/40x40" alt="User profile picture showing a professional engineer in safety gear" class="rounded-full">
+                    <div class="ml-3">
+                        <p class="font-medium text-white" id="usernameDisplay">Loading user...</p>
+                        <button id="logoutButton" class="text-sm text-gray-400 hover:text-white">Sign out</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm z-30">
+                <div class="flex items-center justify-between h-16 px-4">
+                    <div class="flex items-center">
+                        <button id="openSidebar" class="mr-4 text-gray-500 md:hidden">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1 class="text-lg font-semibold text-gray-800">Machine Monitoring Dashboard</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button id="notificationButton" class="p-1 text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-bell"></i>
+                                <span id="notificationBadge" class="absolute top-0 right-0 bg-red-500 text-xs text-white rounded-full h-4 w-4 flex items-center justify-center hidden">3</span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button id="settingsButton" class="flex items-center text-gray-500 hover:text-gray-700">
+                                <img src="https://placehold.co/32x32" alt="User profile picture thumbnail showing a professional engineer" class="rounded-full h-8 w-8">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <main class="flex-1 overflow-y-auto p-4 bg-gray-100">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-lg font-semibold mb-4">System Overview</h2>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-blue-600" id="totalMachines">0</div>
+                                <div class="text-sm text-gray-500">Total Machines</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-green-600" id="runningMachines">0</div>
+                                <div class="text-sm text-gray-500">Running</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-red-600" id="maintenanceMachines">0</div>
+                                <div class="text-sm text-gray-500">Maintenance</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Active Alerts</h2>
+                            <button class="text-blue-600 text-sm hover:text-blue-800">View All</button>
+                        </div>
+                        <div class="space-y-3" id="alertsContainer">
+                            <div class="predictive-alert p-3 bg-red-100 border-l-4 border-red-500 rounded-r">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-red-800">Predictive Maintenance Required</h3>
+                                        <p class="text-sm text-red-600">Motor #3 bearing wear detected (89%)</p>
+                                    </div>
+                                    <span class="text-xs text-red-600">5 min ago</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-yellow-100 border-l-4 border-yellow-500 rounded-r">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-yellow-800">High Temperature Alert</h3>
+                                        <p class="text-sm text-yellow-600">Motor #2 reached 145°C</p>
+                                    </div>
+                                    <span class="text-xs text-yellow-600">30 min ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="text-xl font-semibold mb-4">Machine Status</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Machine Card 1 -->
+                    <div class="machine-card bg-white rounded-lg shadow overflow-hidden transition duration-300">
+                        <div class="bg-blue-600 p-3 text-white flex justify-between items-center">
+                            <h3 class="font-semibold">Pump Motor #1</h3>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">RUNNING</span>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Location</h4>
+                                    <p class="font-medium">Production Line A</p>
+                                </div>
+                                <img src="https://placehold.co/60x60" alt="Industrial pump motor with chrome pipes and metal casing" class="rounded">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Speed</h4>
+                                    <p class="font-medium" id="machine1Speed">1750 RPM</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Voltage</h4>
+                                    <p class="font-medium" id="machine1Voltage">415 V</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Temperature</h4>
+                                    <p class="font-medium" id="machine1Temp">85°C</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Running Hours</h4>
+                                    <p class="font-medium" id="machine1Hours">1,245 hrs</p>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <h4 class="text-gray-500 text-sm">Condition</h4>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-green-600 h-2.5 rounded-full" style="width: 78%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">82% condition - Normal</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Machine Card 2 -->
+                    <div class="machine-card bg-white rounded-lg shadow overflow-hidden transition duration-300">
+                        <div class="bg-blue-600 p-3 text-white flex justify-between items-center">
+                            <h3 class="font-semibold">Conveyor Motor #2</h3>
+                            <span class="predictive-alert bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">MAINTENANCE</span>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Location</h4>
+                                    <p class="font-medium">Packaging Line B</p>
+                                </div>
+                                <img src="https://placehold.co/60x60" alt="Industrial conveyor belt motor with orange safety guards" class="rounded">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Speed</h4>
+                                    <p class="font-medium" id="machine2Speed">1200 RPM</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Voltage</h4>
+                                    <p class="font-medium" id="machine2Voltage">410 V</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Temperature</h4>
+                                    <p class="font-medium" id="machine2Temp">145°C</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Running Hours</h4>
+                                    <p class="font-medium" id="machine2Hours">3,780 hrs</p>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <h4 class="text-gray-500 text-sm">Condition</h4>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-red-600 h-2.5 rounded-full" style="width: 32%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Predictive maintenance required (bearing wear)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Machine Card 3 -->
+                    <div class="machine-card bg-white rounded-lg shadow overflow-hidden transition duration-300">
+                        <div class="bg-blue-600 p-3 text-white flex justify-between items-center">
+                            <h3 class="font-semibold">Compressor #3</h3>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">RUNNING</span>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Location</h4>
+                                    <p class="font-medium">Utilities Area</p>
+                                </div>
+                                <img src="https://placehold.co/60x60" alt="Industrial air compressor with pressure gauges and pipes" class="rounded">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Speed</h4>
+                                    <p class="font-medium" id="machine3Speed">980 RPM</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Voltage</h4>
+                                    <p class="font-medium" id="machine3Voltage">420 V</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Temperature</h4>
+                                    <p class="font-medium" id="machine3Temp">92°C</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-gray-500 text-sm">Running Hours</h4>
+                                    <p class="font-medium" id="machine3Hours">2,450 hrs</p>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <h4 class="text-gray-500 text-sm">Condition</h4>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-yellow-400 h-2.5 rounded-full" style="width: 66%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Good - Monitor oil levels</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Machine Performance Trend</h2>
+                            <select class="text-sm border rounded px-2 py-1">
+                                <option>Last 24 hours</option>
+                                <option selected>Last 7 days</option>
+                                <option>Last 30 days</option>
+                            </select>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Energy Consumption</h2>
+                            <select class="text-sm border rounded px-2 py-1">
+                                <option>Per Hour</option>
+                                <option selected>Per Day</option>
+                                <option>Per Week</option>
+                            </select>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="energyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Login/Signup/Forgot Password Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal controls
+            const loginModal = document.getElementById('loginModal');
+            const signupModal = document.getElementById('signupModal');
+            const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+            const sidebar = document.getElementById('sidebar');
+            
+            // Show login modal by default
+            loginModal.classList.remove('hidden');
+            
+            // Event listeners for modal toggles
+            document.getElementById('showSignup').addEventListener('click', function(e) {
+                e.preventDefault();
+                loginModal.classList.add('hidden');
+                signupModal.classList.remove('hidden');
+            });
+            
+            document.getElementById('showLogin').addEventListener('click', function(e) {
+                e.preventDefault();
+                signupModal.classList.add('hidden');
+                loginModal.classList.remove('hidden');
+            });
+            
+            document.getElementById('forgotPassword').addEventListener('click', function(e) {
+                e.preventDefault();
+                loginModal.classList.add('hidden');
+                forgotPasswordModal.classList.remove('hidden');
+            });
+            
+            document.getElementById('showLoginFromForgot').addEventListener('click', function(e) {
+                e.preventDefault();
+                forgotPasswordModal.classList.add('hidden');
+                loginModal.classList.remove('hidden');
+            });
+            
+            // Modal close handlers
+            document.getElementById('closeLogin').addEventListener('click', function() {
+                loginModal.classList.add('hidden');
+            });
+            
+            document.getElementById('closeSignup').addEventListener('click', function() {
+                signupModal.classList.add('hidden');
+            });
+            
+            document.getElementById('closeForgotPassword').addEventListener('click', function() {
+                forgotPasswordModal.classList.add('hidden');
+            });
+            
+            // Form submissions
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                // Simulate login success
+                setTimeout(() => {
+                    loginModal.classList.add('hidden');
+                    document.getElementById('usernameDisplay').textContent = email;
+                    document.getElementById('openSidebar').click(); // Open sidebar on mobile
+                    
+                    // Simulate fetching machine data
+                    updateMachineStats();
+                    updateMachineStatus();
+                    
+                    // Show success notification
+                    const alertContainer = document.getElementById('alertsContainer');
+                    const loginAlert = document.createElement('div');
+                    loginAlert.className = 'p-3 bg-green-100 border-l-4 border-green-500 rounded-r';
+                    loginAlert.innerHTML = `
+                        <div class="flex justify-between">
+                            <div>
+                                <h3 class="font-medium text-green-800">Login Successful</h3>
+                                <p class="text-sm text-green-600">Welcome back to the Industrial IoT Dashboard</p>
+                            </div>
+                            <span class="text-xs text-green-600">Just now</span>
+                        </div>
+                    `;
+                    alertContainer.prepend(loginAlert);
+                }, 1000);
+            });
+            
+            document.getElementById('signupForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match');
+                    return;
+                }
+                
+                // Simulate signup success
+                setTimeout(() => {
+                    signupModal.classList.add('hidden');
+                    loginModal.classList.remove('hidden');
+                    document.getElementById('loginEmail').value = email;
+                }, 1000);
+            });
+            
+            document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('resetEmail').value;
+                
+                // Simulate password reset email sent
+                setTimeout(() => {
+                    forgotPasswordModal.classList.add('hidden');
+                    loginModal.classList.remove('hidden');
+                    alert(`Password reset link has been sent to ${email}`);
+                }, 1000);
+            });
+            
+            // Sidebar controls
+            document.getElementById('openSidebar').addEventListener('click', function() {
+                sidebar.classList.remove('-translate-x-full');
+            });
+            
+            document.getElementById('closeSidebar').addEventListener('click', function() {
+                sidebar.classList.add('-translate-x-full');
+            });
+            
+            // Logout button
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                loginModal.classList.remove('hidden');
+                // Clear user data and reset UI
+                document.getElementById('usernameDisplay').textContent = 'Loading user...';
+            });
+            
+            // Initialize charts
+            initializeCharts();
+            
+            // Simulate real-time data updates
+            setInterval(updateMachineStatus, 5000);
+            setInterval(updateAlerts, 30000);
+        });
+        
+        function updateMachineStats() {
+            document.getElementById('totalMachines').textContent = '3';
+            document.getElementById('runningMachines').textContent = '2';
+            document.getElementById('maintenanceMachines').textContent = '1';
+        }
+        
+        function updateMachineStatus() {
+            // Simulate changing machine data
+            const speeds = [1750, 1200, 980];
+            const voltages = [415, 410, 420];
+            const temps = [85, 145, 92];
+            
+            speeds.forEach((speed, i) => {
+                const machineNum = i + 1;
+                document.getElementById(`machine${machineNum}Speed`).textContent = 
+                    `${Math.floor(speed + (Math.random() * 20 - 10))} RPM`;
+                document.getElementById(`machine${machineNum}Voltage`).textContent = 
+                    `${Math.floor(voltages[i] + (Math.random() * 10 - 5))} V`;
+                document.getElementById(`machine${machineNum}Temp`).textContent = 
+                    `${Math.floor(temps[i] + (Math.random() * 3 - 1.5))}°C`;
+            });
+        }
+        
+        function updateAlerts() {
+            const alerts = [
+                {
+                    type: 'predictive',
+                    machine: 'Motor #3',
+                    issue: 'bearing wear detected',
+                    severity: 89,
+                    time: '5 min ago'
+                },
+                {
+                    type: 'temperature',
+                    machine: 'Motor #2',
+                    issue: 'high temperature',
+                    value: '145°C',
+                    time: '30 min ago'
+                }
+            ];
+            
+            const alertContainer = document.getElementById('alertsContainer');
+            alertContainer.innerHTML = '';
+            
+            alerts.forEach(alert => {
+                const alertDiv = document.createElement('div');
+                if (alert.type === 'predictive') {
+                    alertDiv.className = 'predictive-alert p-3 bg-red-100 border-l-4 border-red-500 rounded-r';
+                    alertDiv.innerHTML = `
+                        <div class="flex justify-between">
+                            <div>
+                                <h3 class="font-medium text-red-800">Predictive Maintenance Required</h3>
+                                <p class="text-sm text-red-600">${alert.machine} ${alert.issue} (${alert.severity}%)</p>
+                            </div>
+                            <span class="text-xs text-red-600">${alert.time}</span>
+                        </div>
+                    `;
+                } else if (alert.type === 'temperature') {
+                    alertDiv.className = 'p-3 bg-yellow-100 border-l-4 border-yellow-500 rounded-r';
+                    alertDiv.innerHTML = `
+                        <div class="flex justify-between">
+                            <div>
+                                <h3 class="font-medium text-yellow-800">High Temperature Alert</h3>
+                                <p class="text-sm text-yellow-600">${alert.machine} reached ${alert.value}</p>
+                            </div>
+                            <span class="text-xs text-yellow-600">${alert.time}</span>
+                        </div>
+                    `;
+                }
+                alertContainer.appendChild(alertDiv);
+            });
+            
+            // Show notification badge only if there are alerts
+            const notificationBadge = document.getElementById('notificationBadge');
+            if (alerts.length > 0) {
+                notificationBadge.textContent = alerts.length;
+                notificationBadge.classList.remove('hidden');
+            } else {
+                notificationBadge.classList.add('hidden');
+            }
+        }
+        
+        function initializeCharts() {
+            // Performance Trend Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            const performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [
+                        {
+                            label: 'Efficiency (%)',
+                            data: [78, 82, 85, 87, 84, 79, 76],
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Downtime (mins)',
+                            data: [45, 30, 20, 15, 25, 40, 55],
+                            borderColor: 'rgb(234, 88, 12)',
+                            backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Energy Consumption Chart
+            const energyCtx = document.getElementById('energyChart').getContext('2d');
+            const energyChart = new Chart(energyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pump #1', 'Conv. #2', 'Comp. #3', 'Mixer #4', 'Fan #5'],
+                    datasets: [
+                        {
+                            label: 'Energy Consumption (kWh)',
+                            data: [320, 280, 450, 380, 210],
+                            backgroundColor: [
+                                'rgba(59, 130, 246, 0.7)',
+                                'rgba(139, 92, 246, 0.7)',
+                                'rgba(16, 185, 129, 0.7)',
+                                'rgba(245, 158, 11, 0.7)',
+                                'rgba(239, 68, 68, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgb(59, 130, 246)',
+                                'rgb(139, 92, 246)',
+                                'rgb(16, 185, 129)',
+                                'rgb(245, 158, 11)',
+                                'rgb(239, 68, 68)'
+                            ],
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
 </html>
