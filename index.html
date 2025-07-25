@@ -57,7 +57,7 @@
                     <input type="password" id="loginPassword" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center">
+                    <div class="flex items-center overflow-hidden">
                         <input id="rememberMe" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                         <label for="rememberMe" class="ml-2 block text-sm text-gray-700">Remember me</label>
                     </div>
@@ -154,14 +154,14 @@
         <div id="sidebar" class="sidebar w-64 bg-gray-800 text-white p-4 transform -translate-x-full md:translate-x-0 transition-transform duration-300 fixed h-full z-40">
             <div class="flex items-center justify-between border-b border-gray-700 pb-4 mb-4">
                 <h1 class="text-xl font-bold flex items-center">
-                    <img src="https://placehold.co/40x40" alt="Industrial IoT logo showing a gear and microchip combined with network waves" class="mr-2 rounded-full">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-6f1-2a93ccde5887/image/a826b2a7-616b-4709-b864-24f4a16f49d6.png" alt="Industrial IoT logo" class="mr-2 rounded-full w-10 h-10 object-contain">
                     Industrial IoT
                 </h1>
                 <button id="closeSidebar" class="md:hidden">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <nav class="space-y-2">
+            <nav class="space-y-2 overflow-y-auto max-h-[calc(100vh-180px)]">
                 <a href="#" id="dashboardLink" class="block px-4 py-2 rounded hover:bg-gray-700 flex items-center">
                     <i class="fas fa-tachometer-alt mr-3 text-blue-400"></i>
                     Dashboard
@@ -185,7 +185,7 @@
             </nav>
             <div class="absolute bottom-0 left-0 w-full p-4 border-t border-gray-700">
                 <div class="flex items-center">
-                    <img src="https://placehold.co/40x40" alt="User profile picture showing a professional engineer in safety gear" class="rounded-full">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b84a0fea-a738-4768-b23d-bbcf4656449e.png" alt="User profile" class="rounded-full w-10 h-10 object-cover">
                     <div class="ml-3">
                         <p class="font-medium text-white" id="usernameDisplay">Loading user...</p>
                         <button id="logoutButton" class="text-sm text-gray-400 hover:text-white">Sign out</button>
@@ -214,7 +214,7 @@
                         </div>
                         <div class="relative">
                             <button id="settingsButton" class="flex items-center text-gray-500 hover:text-gray-700">
-                                <img src="https://placehold.co/32x32" alt="User profile picture thumbnail showing a professional engineer" class="rounded-full h-8 w-8">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/895cc198-894f-4c08-acfd-ddaf6e7f0b20.png" alt="Profile" class="rounded-full h-8 w-8 object-cover">
                             </button>
                         </div>
                     </div>
@@ -279,11 +279,13 @@
                         </div>
                         <div class="p-4">
                             <div class="flex justify-between items-center mb-4">
-                                <div>
+                                <div class="flex-1">
                                     <h4 class="text-gray-500 text-sm">Location</h4>
                                     <p class="font-medium">Production Line A</p>
                                 </div>
-                                <img src="https://placehold.co/60x60" alt="Industrial pump motor with chrome pipes and metal casing" class="rounded">
+                                <div class="min-w-[64px]">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a43aa660-b6e2-4390-bc16-c84b1f170f9e.png" alt="Pump motor" class="rounded w-16 h-16 object-cover">
+                                </div>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -321,11 +323,11 @@
                         </div>
                         <div class="p-4">
                             <div class="flex justify-between items-center mb-4">
-                                <div>
+                                <div class="flex-1">
                                     <h4 class="text-gray-500 text-sm">Location</h4>
                                     <p class="font-medium">Packaging Line B</p>
                                 </div>
-                                <img src="https://placehold.co/60x60" alt="Industrial conveyor belt motor with orange safety guards" class="rounded">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c813a0c3-c4f2-4570-81c3-07af59b0b17d.png" alt="Industrial conveyor belt motor with orange safety guards" class="rounded w-16 h-16 object-cover ml-4">
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -363,11 +365,11 @@
                         </div>
                         <div class="p-4">
                             <div class="flex justify-between items-center mb-4">
-                                <div>
+                                <div class="flex-1">
                                     <h4 class="text-gray-500 text-sm">Location</h4>
                                     <p class="font-medium">Utilities Area</p>
                                 </div>
-                                <img src="https://placehold.co/60x60" alt="Industrial air compressor with pressure gauges and pipes" class="rounded">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/469389f1-116b-41cd-8d2e-4ff9afcbbeb8.png" alt="Industrial air compressor with pressure gauges and pipes" class="rounded w-16 h-16 object-cover ml-4">
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -491,6 +493,7 @@
                 setTimeout(() => {
                     loginModal.classList.add('hidden');
                     document.getElementById('usernameDisplay').textContent = email;
+                    document.getElementById('logoutButton').textContent = 'Sign out';
                     document.getElementById('openSidebar').click(); // Open sidebar on mobile
                     
                     // Simulate fetching machine data
@@ -559,6 +562,13 @@
                 loginModal.classList.remove('hidden');
                 // Clear user data and reset UI
                 document.getElementById('usernameDisplay').textContent = 'Loading user...';
+                document.getElementById('logoutButton').textContent = 'Sign in';
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+                // Show logout notification
+                showAlert('Successfully logged out', 'green');
+                // Close sidebar on mobile
+                sidebar.classList.add('-translate-x-full');
             });
             
             // Initialize charts
@@ -651,6 +661,26 @@
             }
         }
         
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertsContainer');
+            const alertDiv = document.createElement('div');
+            const bgColors = {
+                green: 'bg-green-100 border-green-500 text-green-800',
+                red: 'bg-red-100 border-red-500 text-red-800',
+                yellow: 'bg-yellow-100 border-yellow-500 text-yellow-800'
+            };
+            alertDiv.className = `p-3 ${bgColors[type]} border-l-4 rounded-r`;
+            alertDiv.innerHTML = `
+                <div class="flex justify-between">
+                    <div>
+                        <h3 class="font-medium">${message}</h3>
+                    </div>
+                    <span class="text-xs">Just now</span>
+                </div>
+            `;
+            alertContainer.prepend(alertDiv);
+        }
+
         function initializeCharts() {
             // Performance Trend Chart
             const performanceCtx = document.getElementById('performanceChart').getContext('2d');
